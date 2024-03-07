@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<String> checkPermission() async {
+    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if(!isLocationEnabled) {
+      return '위치 서비스를 활성화하세요.';
+    }
+
+    // 현재 앱이 가지고 있는 위치 서비스 권한
+    LocationPermission checkedPermission = await Geolocator.checkPermission();
+
+    // 위치 서비스 권한을 사용할 것인지 묻는 창이 나옴(디폴트 값)
+    if(checkedPermission == LocationPermission.denied) {
+      checkedPermission = await Geolocator.requestPermission();
+      if(checkedPermission == LocationPermission.denied){
+        return '위치 권한을 허가해주세요.';
+      }
+
+      if(checkedPermission == LocationPermission.deniedForever) {
+        return '앱의 위치 권한을 세팅해서 허가해주세요.';
+      }
+    }
+
+    return '위치 권한이 허가되었습니다.';
   }
 
   AppBar renderAppBar() {
