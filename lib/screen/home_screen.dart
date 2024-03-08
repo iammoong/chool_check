@@ -19,13 +19,31 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: renderAppBar(),
-      body: Column(
-        children: [
-          _CustomGoogleMap(
-              initialPosition: initialPosition
-          ),
-         _CoolCheckButton(),
-        ],
+      body: FutureBuilder(
+        future: checkPermission(),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if(snapshot.connectionState == ConnectionState.waiting){
+            return Center
+              (child : CircularProgressIndicator(),
+            );
+          }
+
+          if(snapshot.data == '위치 권한이 허가 되었습니다.'){
+            return Column(
+              children: [
+                _CustomGoogleMap(
+                    initialPosition: initialPosition
+                ),
+                _CoolCheckButton(),
+              ],
+            );
+          }
+          return Center(
+            child: Text(
+              snapshot.data
+            ),
+          );
+        },
       ),
     );
   }
@@ -52,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    return '위치 권한이 허가되었습니다.';
+    return '위치 권한이 허가 되었습니다.';
   }
 
   AppBar renderAppBar() {
