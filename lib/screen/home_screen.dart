@@ -11,9 +11,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // latitude - 위도, longitude - 경도
-  static final LatLng companyLatLng = LatLng(37.5233273, 126.921252);
+  static final LatLng companyLatLng = LatLng(37.5232735666, 126.921079159);
   static final CameraPosition initialPosition =
       CameraPosition(target: companyLatLng, zoom: 15);
+
+  // 동그라미 거리를 위한 변수 (단위 m)
+  static final double distance = 100;
+  static final Circle circle = Circle(
+    circleId: CircleId('circle'),
+    center: companyLatLng,
+    fillColor: Colors.blue.withOpacity(0.5),
+    radius: distance,
+    strokeColor: Colors.blue,
+    strokeWidth: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return Column(
               children: [
                 _CustomGoogleMap(
-                    initialPosition: initialPosition
+                  initialPosition: initialPosition,
+                  circle: circle,
                 ),
                 _CoolCheckButton(),
               ],
@@ -89,8 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _CustomGoogleMap extends StatelessWidget {
   final CameraPosition initialPosition;
+  final Circle circle;
   const _CustomGoogleMap({
     required this.initialPosition,
+    required this.circle,
     Key? key,
   }) : super(key: key);
 
@@ -99,8 +113,11 @@ class _CustomGoogleMap extends StatelessWidget {
     return Expanded(
       flex: 2,
       child: GoogleMap(
-        mapType: MapType.normal,
+        mapType: MapType.terrain,
         initialCameraPosition: initialPosition,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        circles: Set.from([circle]),
       ),
     );
   }
