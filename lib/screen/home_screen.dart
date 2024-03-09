@@ -17,13 +17,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 동그라미 거리를 위한 변수 (단위 m)
   static final double distance = 100;
-  static final Circle circle = Circle(
-    circleId: CircleId('circle'),
+  
+  // 원안에 도착했을 때
+  static final Circle withinDistanceCircle = Circle(
+    circleId: CircleId('withinDistanceCircle'),
     center: companyLatLng,
     fillColor: Colors.blue.withOpacity(0.5),
     radius: distance,
     strokeColor: Colors.blue,
     strokeWidth: 1,
+  );
+
+  // 원 밖에 있을 때
+  static final Circle notWithinDistanceCircle = Circle(
+    circleId: CircleId('notWithinDistanceCircle'),
+    center: companyLatLng,
+    fillColor: Colors.red.withOpacity(0.5),
+    radius: distance,
+    strokeColor: Colors.red,
+    strokeWidth: 1,
+  );
+
+  static final Circle checkDoneCircle = Circle(
+    circleId: CircleId('checkDoneCircle'),
+    center: companyLatLng,
+    fillColor: Colors.green.withOpacity(0.5),
+    radius: distance,
+    strokeColor: Colors.green,
+    strokeWidth: 1,
+  );
+
+  static final Marker marker = Marker(
+      markerId: MarkerId('marker'),
+    position: companyLatLng,
   );
 
   @override
@@ -44,7 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _CustomGoogleMap(
                   initialPosition: initialPosition,
-                  circle: circle,
+                  circle: withinDistanceCircle,
+                  marker : marker,
                 ),
                 _CoolCheckButton(),
               ],
@@ -102,9 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
 class _CustomGoogleMap extends StatelessWidget {
   final CameraPosition initialPosition;
   final Circle circle;
+  final Marker marker;
   const _CustomGoogleMap({
     required this.initialPosition,
     required this.circle,
+    required this.marker,
     Key? key,
   }) : super(key: key);
 
@@ -118,6 +147,7 @@ class _CustomGoogleMap extends StatelessWidget {
         myLocationEnabled: true,
         myLocationButtonEnabled: false,
         circles: Set.from([circle]),
+        markers: Set.from([marker]),
       ),
     );
   }
