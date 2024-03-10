@@ -16,14 +16,14 @@ class _HomeScreenState extends State<HomeScreen> {
       CameraPosition(target: companyLatLng, zoom: 15);
 
   // 동그라미 거리를 위한 변수 (단위 m)
-  static final double distance = 100;
+  static final double okDistance = 100;
   
   // 원안에 도착했을 때
   static final Circle withinDistanceCircle = Circle(
     circleId: CircleId('withinDistanceCircle'),
     center: companyLatLng,
     fillColor: Colors.blue.withOpacity(0.5),
-    radius: distance,
+    radius: okDistance,
     strokeColor: Colors.blue,
     strokeWidth: 1,
   );
@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     circleId: CircleId('notWithinDistanceCircle'),
     center: companyLatLng,
     fillColor: Colors.red.withOpacity(0.5),
-    radius: distance,
+    radius: okDistance,
     strokeColor: Colors.red,
     strokeWidth: 1,
   );
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     circleId: CircleId('checkDoneCircle'),
     center: companyLatLng,
     fillColor: Colors.green.withOpacity(0.5),
-    radius: distance,
+    radius: okDistance,
     strokeColor: Colors.green,
     strokeWidth: 1,
   );
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: renderAppBar(),
-      body: FutureBuilder(
+      body: FutureBuilder<String>(
         future: checkPermission(),
         builder: (BuildContext context, AsyncSnapshot snapshot){
           if(snapshot.connectionState == ConnectionState.waiting){
@@ -66,15 +66,44 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if(snapshot.data == '위치 권한이 허가 되었습니다.'){
-            return Column(
-              children: [
-                _CustomGoogleMap(
-                  initialPosition: initialPosition,
-                  circle: withinDistanceCircle,
-                  marker : marker,
-                ),
-                _CoolCheckButton(),
-              ],
+            return StreamBuilder<Position>(
+              stream: Geolocator.getPositionStream(),
+              builder: (context, snapshot) {
+                //현재 핸드폰 위치가 원 안에 있는지 없는지
+                bool isWithinRange = false;
+
+                if(snapshot.hasData) {
+                  // 현재 내 위치
+                  final start = snapshot.data!;
+                  // 회사 위치
+                  final end = companyLatLng;
+                  // 현재 위치와 회사 위치 계산
+                  final distance = Geolocator.distanceBetween(
+                      start.latitude,
+                      start.longitude,
+                      end.latitude,
+                      end.longitude,
+                  );
+
+                  if(distance < okDistance) {
+                    isWithinRange = true;
+                  }
+                  
+                }
+
+                return Column(
+                  children: [
+                    _CustomGoogleMap(
+                      initialPosition: initialPosition,
+                      circle: isWithinRange
+                          ? withinDistanceCircle
+                          : notWithinDistanceCircle,
+                      marker : marker,
+                    ),
+                    _CoolCheckButton(),
+                  ],
+                );
+              }
             );
           }
           return Center(
